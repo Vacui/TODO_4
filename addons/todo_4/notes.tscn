@@ -1,0 +1,151 @@
+[gd_scene load_steps=7 format=3 uid="uid://dm3r5n7oqf3ar"]
+
+[ext_resource type="Texture2D" uid="uid://bbl1guv1hfmns" path="res://addons/todo_4/icons/gui_tab_menu.svg" id="1_0vb1u"]
+[ext_resource type="Texture2D" uid="uid://dtla1pq67n8n8" path="res://addons/todo_4/icons/reload.svg" id="2_cp6g2"]
+[ext_resource type="Texture2D" uid="uid://dogfui2bv802h" path="res://addons/todo_4/icons/add.svg" id="3_bmjix"]
+[ext_resource type="Texture2D" uid="uid://dxptrpo2jt0mg" path="res://addons/todo_4/icons/close.svg" id="4_m6p02"]
+[ext_resource type="Texture2D" uid="uid://sb8xofh5lkhc" path="res://addons/todo_4/icons/save.svg" id="5_onlrq"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ag4ix"]
+content_margin_left = 4.0
+content_margin_right = 4.0
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[node name="Notes" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="v_box_container" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="panel" type="Panel" parent="v_box_container"]
+custom_minimum_size = Vector2(0, 31)
+layout_mode = 2
+
+[node name="files" type="TabBar" parent="v_box_container/panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -62.0
+grow_horizontal = 2
+grow_vertical = 2
+tab_close_display_policy = 1
+tab_count = 1
+tab_0/title = "Node"
+
+[node name="notes_options" type="MenuButton" parent="v_box_container/panel"]
+custom_minimum_size = Vector2(31, 31)
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -24.0
+grow_horizontal = 0
+grow_vertical = 2
+icon = ExtResource("1_0vb1u")
+icon_alignment = 1
+item_count = 2
+popup/item_0/text = "Reload"
+popup/item_0/icon = ExtResource("2_cp6g2")
+popup/item_0/id = 0
+popup/item_1/text = "New"
+popup/item_1/icon = ExtResource("3_bmjix")
+popup/item_1/id = 1
+
+[node name="h_new" type="HBoxContainer" parent="v_box_container"]
+layout_mode = 2
+
+[node name="file_name" type="LineEdit" parent="v_box_container/h_new"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Enter file name..."
+clear_button_enabled = true
+
+[node name="file_ext" type="OptionButton" parent="v_box_container/h_new"]
+layout_mode = 2
+item_count = 9
+selected = 0
+allow_reselect = true
+popup/item_0/text = "TXT (*.txt)"
+popup/item_0/id = 0
+popup/item_1/text = "MD (*.md)"
+popup/item_1/id = 1
+popup/item_2/text = "CFG (*.cfg)"
+popup/item_2/id = 2
+popup/item_3/text = "INI (*.ini)"
+popup/item_3/id = 3
+popup/item_4/text = "LOG (*.log)"
+popup/item_4/id = 4
+popup/item_5/text = "JSON (*.json)"
+popup/item_5/id = 5
+popup/item_6/text = "YML (*.yml)"
+popup/item_6/id = 6
+popup/item_7/text = "YAML (*.yaml)"
+popup/item_7/id = 7
+popup/item_8/text = "TOML (*.toml)"
+popup/item_8/id = 8
+
+[node name="btn_new" type="Button" parent="v_box_container/h_new"]
+custom_minimum_size = Vector2(31, 31)
+layout_mode = 2
+tooltip_text = "Create file"
+icon = ExtResource("3_bmjix")
+flat = true
+icon_alignment = 1
+
+[node name="btn_close" type="Button" parent="v_box_container/h_new"]
+custom_minimum_size = Vector2(31, 31)
+layout_mode = 2
+tooltip_text = "Close"
+icon = ExtResource("4_m6p02")
+flat = true
+icon_alignment = 1
+
+[node name="h_edit" type="HBoxContainer" parent="v_box_container"]
+custom_minimum_size = Vector2(0, 31)
+layout_mode = 2
+
+[node name="btn_save" type="Button" parent="v_box_container/h_edit"]
+custom_minimum_size = Vector2(31, 0)
+layout_mode = 2
+tooltip_text = "Save file"
+theme_override_styles/normal = SubResource("StyleBoxFlat_ag4ix")
+icon = ExtResource("5_onlrq")
+flat = true
+icon_alignment = 1
+
+[node name="btn_reload" type="Button" parent="v_box_container/h_edit"]
+custom_minimum_size = Vector2(31, 0)
+layout_mode = 2
+tooltip_text = "Reload file"
+theme_override_styles/normal = SubResource("StyleBoxFlat_ag4ix")
+icon = ExtResource("2_cp6g2")
+flat = true
+icon_alignment = 1
+
+[node name="label_unsaved" type="Label" parent="v_box_container/h_edit"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Unsaved changes!"
+horizontal_alignment = 2
+
+[node name="text_edit" type="TextEdit" parent="v_box_container"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="dialog_confirm_delete" type="ConfirmationDialog" parent="."]
+initial_position = 2
+size = Vector2i(328, 100)
+ok_button_text = "Delete"
+dialog_text = "Are you sure you want to delete the file?"
