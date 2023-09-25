@@ -2,6 +2,8 @@
 
 Keep your **ideas** and **notes** of your Godot projects!
 
+![TODO 4](./screenshot.jpg)
+
 ## What?
 
 With this *Godot engine* plugin, you are able to write ideas and notes for tracking your project status.
