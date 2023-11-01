@@ -1,169 +1,54 @@
 @tool
 extends EditorPlugin
+class_name TD4
 
 const PLUGIN_PATH := "res://addons/todo_4/"
-const NOTES_DIRECTORY_PATH := PLUGIN_PATH + "notes/"
-const SUPPORTED_EXT := ["txt", "md", "cfg", "ini", "log", "json", "yml", "yaml", "toml"]
-
-const TAB_ICON: Texture2D = preload(PLUGIN_PATH + "icons/text_file.svg")
-
-var _save_path: String
+const SRC_DIRECTORY_PATH := TD4.PLUGIN_PATH + "src/"
 
 var _dock: Control
-var _btn_save: Button
-var _label_unsaved: Label
-var _text: TextEdit
-var _files: PackedStringArray
-var _files_tab: TabBar
-var delete_confirm_dialog: ConfirmationDialog
+var _select_panel: MenuButton
+var _current_panel_index := -1
 
-var _new_node: Control
-
-
-func get_all_files(path: String, file_ext: PackedStringArray = []) -> PackedStringArray:
-	var dir = DirAccess.open(path)
-	
-	if(dir == null):
-		return []
-	
-	var file_names = dir.get_files()
-	
-	var result = PackedStringArray()
-	
-	for f in file_names:
-		if(file_ext.size() == 0 || file_ext.has(f.get_extension())):
-			result.append(f)
-	
-	return result
-
-
-func _tab_changed(tab_index: int) -> void:
-	if(tab_index < 0 || tab_index >= _files.size()):
-		_reload_tabs()
-		return
-	
-	var file_name = _files[tab_index]
-	var path: String = NOTES_DIRECTORY_PATH + file_name;
-	if FileAccess.file_exists(path):
-		var file = FileAccess.open(path, FileAccess.READ)
-		_save_path = path
-		_text.text = file.get_as_text()
-		_text.clear_undo_history()
-		_change_save_status(false)
-	else:
-		_reload_tabs()
-
-
-func _open_new() -> void:
-	if(_new_node.visible == true):
-		return
-	
-	_new_node.visible = true
-
-
-func _close_new() -> void:
-	if(_new_node.visible == false):
-		return
-	
-	var input = _new_node.get_node("file_name") as LineEdit
-	input.clear()
-	_new_node.visible = false
-
-
-func _reload_tabs() -> void:
-	_files = get_all_files(NOTES_DIRECTORY_PATH, SUPPORTED_EXT)
-	_files_tab.clear_tabs()
-	for f in _files:
-		_files_tab.add_tab(f.get_basename(), TAB_ICON)
-	
-	_close_new()
-	_files_tab.current_tab = 0
-
-
-func _btn_reload_click() -> void:
-	_tab_changed(_files_tab.current_tab)
-
-
-func _change_save_status(needs_save: bool) -> void:
-	_btn_save.disabled = !needs_save
-	_label_unsaved.visible = needs_save
-
-
-func _btn_save_click() -> void:
-	var file = FileAccess.open(_save_path, FileAccess.WRITE)
-	file.store_string(_text.text)
-	file.close()
-	_change_save_status(false)
-
-
-func _new_file() -> void:
-	var input = _new_node.get_node("file_name") as LineEdit
-	var ext = SUPPORTED_EXT[(_new_node.get_node("file_ext") as OptionButton).selected]
-	var file_name: String = input.text + "." + ext
-	_save_path = NOTES_DIRECTORY_PATH + file_name;
-	
-	var file = FileAccess.open(_save_path, FileAccess.WRITE)
-	file.store_string("")
-	file.close()
-	_change_save_status(false)
-	
-	_reload_tabs()
-	_files_tab.current_tab = _files.find(file_name)
-
-
-func _notes_option_selected(option_index: int) -> void:
-	match option_index:
-		0:
-			_reload_tabs()
-		1:
-			_open_new()
-
-
-func _delete_file() -> void:
-	var dir = DirAccess.open(NOTES_DIRECTORY_PATH)
-	dir.remove(_files[_files_tab.current_tab])
-	_reload_tabs()
-
-
-func _show_delete_confirm(file_index: int) -> void:
-	if(file_index < 0 || file_index >= _files.size()):
-		_reload_tabs()
-		return
-	
-	var delete_confirm_dialog = _dock.get_node("dialog_confirm_delete") as ConfirmationDialog
-	delete_confirm_dialog.dialog_text = "Are you sure you want to delete the file '%s'?" % _files[file_index]
-	delete_confirm_dialog.show()
+var _panels: Array[TDPanel] = []
 
 
 func _enter_tree() -> void:
 	_dock = preload(PLUGIN_PATH + "notes.tscn").instantiate() as Control
 	add_control_to_dock(DOCK_SLOT_RIGHT_BR, _dock)
 	
-	# tabs
-	_files_tab = _dock.get_node("v_box_container/panel/files") as TabBar
-	_files_tab.connect("tab_changed", _tab_changed)
-	_files_tab.connect("tab_close_pressed", _show_delete_confirm)
-	var delete_confirm_dialog = _dock.get_node("dialog_confirm_delete") as ConfirmationDialog
-	delete_confirm_dialog.connect("confirmed", _delete_file)
+	var settings = preload(SRC_DIRECTORY_PATH + "settings.gd").new() as TD4Settings
+	settings.init(_dock.get_node("settings"))
 	
-	# options
-	var notes_options = _dock.get_node("v_box_container/panel/notes_options") as MenuButton
-	notes_options.get_popup().connect("index_pressed", _notes_option_selected)
-	_new_node = _dock.get_node("v_box_container/h_new") as Control
-	_new_node.get_node("btn_new").connect("pressed", _new_file)
-	_new_node.get_node("btn_close").connect("pressed", _close_new)
 	
-	# edit
-	var h_edit = _dock.get_node("v_box_container/h_edit") as HBoxContainer
-	_label_unsaved = h_edit.get_node("label_unsaved") as Label
-	_btn_save = h_edit.get_node("btn_save") as Button
-	_btn_save.connect("pressed", _btn_save_click)
-	var btn_reload = h_edit.get_node("btn_reload") as Button
-	btn_reload.connect("pressed", _btn_reload_click)
-	_text = _dock.get_node("v_box_container/text_edit") as  TextEdit
-	_text.connect("text_changed", func(): _change_save_status(true))
+	var notes = preload(SRC_DIRECTORY_PATH + "notes.gd").new() as TD4Notes
+	notes.init(_dock.get_node("notes"))
+	notes.apply_config(settings.config_file)
 	
-	_reload_tabs()
+	var on_config_changed = func(new_config_file: ConfigFile): notes.apply_config(new_config_file)
+	settings.connect("on_config_changed", on_config_changed)
+	
+	
+	_panels.append(notes)
+	_panels.append(settings)
+	
+	_select_panel = _dock.get_node("select_panel") as MenuButton
+	_select_panel.get_popup().connect("index_pressed", _change_panel)
+	
+	_change_panel(0)
+
+
+func _change_panel(panel_index: int) -> void:
+	if(panel_index < 0 ||
+	panel_index >= _panels.size() ||
+	panel_index == _current_panel_index):
+		return
+	
+	_panels[_current_panel_index].hide()
+	_panels[panel_index].show()
+	
+	_select_panel.icon = _select_panel.get_popup().get_item_icon(panel_index)
+	
+	_current_panel_index = panel_index
 
 
 func _exit_tree() -> void:

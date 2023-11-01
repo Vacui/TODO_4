@@ -1,0 +1,14 @@
+-	show grid also in stack btn
+-	stack -> deck
+-	order deck by name
+-	log effects
+-	give 2 refresh end battle
+-	give 2 remove end battle
+-	remove & refresh amount
+-	upload editor icons
+-	stop hover tips on grid when stack open
+-	remove capital letter from properties
+-	add flag "avoid self" in filters
+-	rates for choosing choices units using rarity
+-	do not pop unit numbers if not changed
+-	min to stats?

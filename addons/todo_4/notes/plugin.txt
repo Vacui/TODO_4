@@ -1,0 +1,4 @@
+-	publish 1.1.0 version (updated files inside RNG project)
+-	add dialog to ask whether or not auto save when changing without setting enabled
+-	react to CTRL-S to save note
+-	auto save when closing project
